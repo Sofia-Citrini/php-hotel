@@ -36,6 +36,42 @@
       'distance_to_center' => 50
     ],
   ];
+
+  //controllo che esista
+  $park = $_GET["park"] ?? '';
+  $stars = $_GET["stars"] ?? '';
+  // echo "Parcheggi".$park."<br>";
+  // echo "Stelle".$stars."<br>";
+
+  //se non é stringa vuota o undefined ho dei filtri attivi
+  $hasFilter = !empty($stars) || !empty($park);
+
+  //array in cui salvare i dati filtrati
+  $filterData = [];
+
+  //filtro i dati se nel GET ho almeno una della chiavi dei dati
+  if ($hasFilter){
+    //ciclo su hotels e per ogni elemento di questo array
+    //devo decidere, in base ai filtri, se pusharlo nell'array
+    foreach ($hotels as $hotel) {
+      $mustPush = true;
+
+      if ($hotel["vote"] < $stars){
+        $mustPush = false;
+      }
+
+      if ($park === 'on' && $hotel["parking"] === false) {
+        $mustPush = false;
+      }
+
+      if($mustPush) {
+        $filterData[] = $hotel;
+      }
+    }
+  } else{
+    //se non ci sono filtri attivi
+    $filterData = $hotels;
+  }
 ?>
 
 <!DOCTYPE html>
@@ -55,6 +91,23 @@
     <main class="container">
         <h1 class="py-3">HOTEL</h1>
 
+        <form method="GET" class="row">
+          <div class="col-6">
+            <input type="checkbox" name="park">
+            <label>Hotel con parcheggio</label>
+          </div>
+          
+          <div class="col-6">
+            <input type="number" class="form-control" name="stars" placeholder="Numero di stelle">
+          </div>
+          
+          <div class="col-12 text-center my-3">
+            <a class="btn btn-secondary" href="index.php">Annulla Filtri</a>
+            <button class="btn btn-primary" type="submit" >Filtra</button>
+          </div>
+          
+        </form>
+
         <table class="table table-striped">
           <thead>
             <tr>
@@ -67,7 +120,7 @@
           </thead>
           <tbody>
             <?php
-              foreach ($hotels as $hotel) {
+              foreach ($filterData as $hotel) {
                 echo "<tr>";
                 echo "<td>{$hotel['name']}</td>";
                 echo "<td>{$hotel['description']}</td>";
